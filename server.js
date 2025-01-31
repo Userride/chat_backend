@@ -21,10 +21,10 @@ const app = express();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Enable CORS
+// Enable CORS with dynamic origin
 app.use(
   cors({
-    origin: "http://localhost:3000", // Allow frontend requests
+    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Default to localhost during development
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -64,7 +64,7 @@ const server = app.listen(
 const io = socketIO(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000", // Allow frontend origin
+    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Use dynamic origin
   },
 });
 
