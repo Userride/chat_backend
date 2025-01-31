@@ -21,10 +21,23 @@ const app = express();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Enable CORS with dynamic origin
+// Enable CORS with dynamic origin (allowing localhost and production frontend)
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Default to localhost during development
+    origin: (origin, callback) => {
+      // Define allowed origins
+      const allowedOrigins = [
+        "http://localhost:3000", // Local development
+        "https://chat-frontend-ltmt.vercel.app", // Production frontend
+      ];
+
+      // If the origin is in the allowedOrigins list or no origin is sent, allow the request
+      if (allowedOrigins.includes(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"), false);
+      }
+    },
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -38,13 +51,11 @@ app.use("/api/message", messageRoutes);
 // Deployment setup
 const __dirname1 = path.resolve();
 if (process.env.NODE_ENV === "production") {
-  // Serve static files in production (for React frontend)
   app.use(express.static(path.join(__dirname1, "/frontend/build")));
   app.get("*", (req, res) =>
     res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"))
   );
 } else {
-  // Fallback to basic message in development mode
   app.get("/", (req, res) => {
     res.send("API is running...");
   });
@@ -66,7 +77,7 @@ const server = app.listen(
 const io = socketIO(server, {
   pingTimeout: 60000,
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Use dynamic origin for CORS
+    origin: "https://chat-frontend-ltmt.vercel.app", // Allow production frontend
   },
 });
 
