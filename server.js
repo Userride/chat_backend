@@ -28,7 +28,7 @@ app.use(
       // Define allowed origins
       const allowedOrigins = [
         "http://localhost:3000", // Local development
-        "https://chat-frontend-ltmt.vercel.app", // Production frontend
+        "https://chatapp1-black.vercel.app/", // Production frontend
       ];
 
       // If the origin is in the allowedOrigins list or no origin is sent, allow the request
@@ -77,7 +77,7 @@ const server = app.listen(
 const io = socketIO(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "https://chat-frontend-ltmt.vercel.app", // Allow production frontend
+    origin: "https://chatapp1-black.vercel.app/", // Allow production frontend
   },
 });
 
