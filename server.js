@@ -21,25 +21,26 @@ const app = express();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Enable CORS with dynamic origin (allowing localhost and production frontend)
+// Define allowed origins
+const allowedOrigins = [
+  "http://localhost:3000", // Local development
+  "https://chatapp1-black.vercel.app/", // Production frontend
+];
+
+// Enable CORS for Express API
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Define allowed origins
-      const allowedOrigins = [
-        "http://localhost:3000", // Local development
-        "https://chatapp1-black.vercel.app/", // Production frontend
-      ];
-
-      // If the origin is in the allowedOrigins list or no origin is sent, allow the request
-      if (allowedOrigins.includes(origin) || !origin) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.error(`CORS Error: Origin ${origin} not allowed`);
         callback(new Error("CORS not allowed"), false);
       }
     },
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // Required for authentication
   })
 );
 
@@ -77,7 +78,9 @@ const server = app.listen(
 const io = socketIO(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "https://chatapp1-black.vercel.app/", // Allow production frontend
+    origin: allowedOrigins, // Allow both localhost & production frontend
+    methods: ["GET", "POST"],
+    credentials: true, // Required for authentication
   },
 });
 
@@ -116,5 +119,11 @@ io.on("connection", (socket) => {
   // Handle user disconnect
   socket.on("disconnect", () => {
     console.log("User disconnected from Socket.IO");
+  });
+
+  // Clean up when user leaves a chat
+  socket.on("leave chat", (room) => {
+    socket.leave(room);
+    console.log(`User left room: ${room}`);
   });
 });
