@@ -23,8 +23,8 @@ app.use(express.json());
 
 // Define allowed origins
 const allowedOrigins = [
-  "http://localhost:3000", // Local development
-  "https://chatapp1-black.vercel.app/", // Production frontend
+  "http://localhost:3000",  // Local development
+  "https://chatapp1-black.vercel.app", // Production frontend
 ];
 
 // Enable CORS for Express API
@@ -40,7 +40,7 @@ app.use(
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // Required for authentication
+    credentials: true, // Required for authentication (cookies, etc.)
   })
 );
 
@@ -80,7 +80,7 @@ const io = socketIO(server, {
   cors: {
     origin: allowedOrigins, // Allow both localhost & production frontend
     methods: ["GET", "POST"],
-    credentials: true, // Required for authentication
+    credentials: true, // Required for authentication (cookies, etc.)
   },
 });
 
